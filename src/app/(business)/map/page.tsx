@@ -1,7 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { DatasetMap } from "@/components/map/dataset-map";
+import { useState, useEffect, Suspense, lazy } from "react";
+import type { FeatureCollection } from "geojson";
+
+// Prevent server-side rendering
+export const dynamic = "force-dynamic";
+
+// Lazy load the map component
+const DatasetMap = lazy(() =>
+  import("@/components/map/dataset-map").then((mod) => ({
+    default: mod.DatasetMap,
+  }))
+);
+
 import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,33 +30,8 @@ import { Search, Filter, MapPin, Database } from "lucide-react";
 import type { Dataset } from "@/types";
 import Link from "next/link";
 
-// Mock GeoJSON data for Niger State LGAs (simplified)
-const nigerStateBoundary = {
-  type: "FeatureCollection",
-  features: [
-    {
-      type: "Feature",
-      properties: {
-        name: "Niger State",
-        description: "Niger State boundary",
-      },
-      geometry: {
-        type: "Polygon",
-        coordinates: [
-          [
-            [6.2, 10.5],
-            [7.8, 10.5],
-            [7.8, 8.8],
-            [6.2, 8.8],
-            [6.2, 10.5],
-          ],
-        ],
-      },
-    },
-  ],
-};
-
 export default function MapExplorePage() {
+  const [mounted, setMounted] = useState(false);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [filteredDatasets, setFilteredDatasets] = useState<Dataset[]>([]);
   const [groups, setGroups] = useState<Array<{ id: string; name: string; slug: string }>>([]);
@@ -53,6 +39,37 @@ export default function MapExplorePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedDataset, setSelectedDataset] = useState<Dataset | null>(null);
+
+  // Ensure component only renders on client
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Mock GeoJSON data for Niger State LGAs (simplified) - inside component to avoid SSR issues
+  const nigerStateBoundary: FeatureCollection = {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: {
+          name: "Niger State",
+          description: "Niger State boundary",
+        },
+        geometry: {
+          type: "Polygon",
+          coordinates: [
+            [
+              [6.2, 10.5],
+              [7.8, 10.5],
+              [7.8, 8.8],
+              [6.2, 8.8],
+              [6.2, 10.5],
+            ],
+          ],
+        },
+      },
+    ],
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -106,6 +123,20 @@ export default function MapExplorePage() {
       description: `${dataset.organisation.name} • ${dataset.downloadCount} downloads`,
     }));
 
+  // Don't render until mounted on client
+  if (!mounted) {
+    return (
+      <main className="flex-1">
+        <div className="border-b bg-background">
+          <Container size="wide" className="py-8">
+            <h1 className="text-3xl font-bold">Explore Data on Map</h1>
+            <p className="mt-2 text-muted-foreground">Loading...</p>
+          </Container>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="flex-1">
       {/* Header */}
@@ -148,7 +179,10 @@ export default function MapExplorePage() {
               <CardContent className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Topic</label>
-                  <Select value={selectedGroup} onValueChange={setSelectedGroup}>
+                  <Select 
+                    value={selectedGroup} 
+                    onValueChange={(value) => setSelectedGroup(value || "all")}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a topic" />
                     </SelectTrigger>
@@ -216,12 +250,20 @@ export default function MapExplorePage() {
 
           {/* Map */}
           <div className="lg:col-span-2">
-            <DatasetMap
-              geoJsonData={nigerStateBoundary}
-              markers={mapMarkers}
-              height="calc(100vh - 200px)"
-              showControls={true}
-            />
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center h-[calc(100vh-200px)] border rounded-lg bg-muted/20">
+                  <p className="text-muted-foreground">Loading map...</p>
+                </div>
+              }
+            >
+              <DatasetMap
+                geoJsonData={nigerStateBoundary}
+                markers={mapMarkers}
+                height="calc(100vh - 200px)"
+                showControls={true}
+              />
+            </Suspense>
 
             {/* Selected Dataset Info */}
             {selectedDataset && (

@@ -2,10 +2,20 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import type { GeoJSON as GeoJSONType } from "geojson";
+import type { FeatureCollection, Feature } from "geojson";
 import { Loader2, Maximize2, Minimize2, Layers, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import L from "leaflet";
+
+// Fix Leaflet marker icons in Next.js
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
 
 // Dynamically import Leaflet to avoid SSR issues
 const MapContainer = dynamic(
@@ -36,9 +46,17 @@ const ZoomControl = dynamic(
 // Niger State coordinates (approximate center)
 const NIGER_STATE_CENTER: [number, number] = [9.9319, 6.5470];
 const DEFAULT_ZOOM = 8;
+const MIN_ZOOM = 7; // Prevent zooming out too far
+const MAX_ZOOM = 18; // Allow detailed view
+
+// Niger State approximate boundary (simplified polygon)
+const NIGER_STATE_BOUNDS: L.LatLngBoundsExpression = [
+  [8.5, 3.5],  // Southwest corner
+  [11.5, 8.5], // Northeast corner
+];
 
 interface DatasetMapProps {
-  geoJsonData?: GeoJSONType.FeatureCollection | GeoJSONType.Feature;
+  geoJsonData?: FeatureCollection | Feature;
   markers?: Array<{
     id: string;
     position: [number, number];
@@ -63,11 +81,9 @@ export function DatasetMap({
   const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
-    // Import Leaflet CSS
-    import("leaflet/dist/leaflet.css").then(() => {
-      setMapReady(true);
-      setLoading(false);
-    });
+    // Mark map as ready after component mounts
+    setMapReady(true);
+    setLoading(false);
   }, []);
 
   const toggleFullscreen = () => {
@@ -160,6 +176,10 @@ export function DatasetMap({
         <MapContainer
           center={NIGER_STATE_CENTER}
           zoom={DEFAULT_ZOOM}
+          minZoom={MIN_ZOOM}
+          maxZoom={MAX_ZOOM}
+          maxBounds={NIGER_STATE_BOUNDS}
+          maxBoundsViscosity={1.0}
           zoomControl={false}
           style={{ height: "100%", width: "100%" }}
           className="z-0"
@@ -172,15 +192,16 @@ export function DatasetMap({
             attribution={baseLayers[baseLayer].attribution}
           />
 
-          {/* GeoJSON Layer */}
+          {/* GeoJSON Layer - with prominent state boundary */}
           {geoJsonData && (
             <GeoJSON
               data={geoJsonData}
               style={{
-                color: "#3b82f6",
-                weight: 2,
-                fillOpacity: 0.2,
-                fillColor: "#3b82f6",
+                color: "#16a34a", // Green for state boundary
+                weight: 3,
+                fillOpacity: 0.05,
+                fillColor: "#16a34a",
+                dashArray: "5, 5",
               }}
               onEachFeature={(feature, layer) => {
                 if (feature.properties) {
