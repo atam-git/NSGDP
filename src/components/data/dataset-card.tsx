@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Download, Calendar } from "lucide-react";
+import { Download, Calendar, TrendingUp } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { Dataset } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -18,85 +18,108 @@ export function DatasetCard({ dataset, className }: DatasetCardProps) {
     <Link href={`/datasets/${dataset.slug}`}>
       <Card
         className={cn(
-          "group relative transition-all hover:shadow-md hover:border-primary/50",
+          "group relative flex flex-col transition-all duration-200 hover:shadow-lg hover:border-primary/40 hover:-translate-y-0.5",
           className
         )}
       >
-        {/* Visibility Badge (top-right) */}
-        <div className="absolute right-3 top-3">
+        {/* Status Badge (top-right) */}
+        <div className="absolute right-3 top-3 z-10">
           <VisibilityBadge visibility={dataset.visibility} />
         </div>
 
-        <CardHeader>
-          {/* Organisation */}
-          <div className="flex items-center gap-2 mb-2">
+        <CardHeader className="pb-3">
+          {/* Organisation Header */}
+          <div className="dataset-org-header flex items-center gap-2.5 mb-3">
             {dataset.organisation.logoUrl ? (
               <Image
                 src={dataset.organisation.logoUrl}
                 alt=""
-                width={24}
-                height={24}
-                className="rounded object-cover"
+                width={32}
+                height={32}
+                className="rounded-md object-cover"
               />
             ) : (
-              <div className="flex size-6 items-center justify-center rounded bg-primary/10 text-primary text-xs font-semibold">
+              <div className="flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary text-xs font-semibold flex-shrink-0">
                 {dataset.organisation.name.charAt(0)}
               </div>
             )}
-            <span className="text-xs text-muted-foreground">
-              {dataset.organisation.name}
-            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-muted-foreground truncate">
+                {dataset.organisation.name}
+              </p>
+              <p className="text-xs text-muted-foreground/70">Verified Source</p>
+            </div>
           </div>
 
-          <CardTitle className="line-clamp-2 pr-8">{dataset.title}</CardTitle>
-          
+          {/* Title & Description */}
+          <CardTitle className="text-lg line-clamp-2 pr-6 leading-snug">{dataset.title}</CardTitle>
+
           {dataset.description && (
-            <CardDescription className="line-clamp-2">
+            <CardDescription className="line-clamp-2 text-sm mt-2">
               {dataset.description}
             </CardDescription>
           )}
         </CardHeader>
 
-        <CardContent className="space-y-3">
-          {/* Groups (max 3) */}
+        <CardContent className="flex-1 space-y-4">
+          {/* Topic Tags */}
           {dataset.groups.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {dataset.groups.slice(0, 3).map((group) => (
-                <Badge key={group.id} variant="secondary" className="text-xs">
+            <div className="dataset-topics flex flex-wrap gap-1.5">
+              {dataset.groups.slice(0, 2).map((group) => (
+                <Badge
+                  key={group.id}
+                  variant="secondary"
+                  className="text-xs bg-primary/10 text-primary border-0 font-medium"
+                >
                   {group.name}
                 </Badge>
               ))}
-              {dataset.groups.length > 3 && (
-                <Badge variant="secondary" className="text-xs">
-                  +{dataset.groups.length - 3}
+              {dataset.groups.length > 2 && (
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-muted text-muted-foreground border-0"
+                >
+                  +{dataset.groups.length - 2} more
                 </Badge>
               )}
             </div>
           )}
 
-          {/* Formats */}
+          {/* Format Tags */}
           {dataset.formats.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {dataset.formats.map((format) => (
-                <Badge key={format} variant="outline" className="text-xs font-mono">
+            <div className="dataset-formats flex flex-wrap gap-1.5">
+              {dataset.formats.slice(0, 3).map((format) => (
+                <Badge
+                  key={format}
+                  variant="outline"
+                  className="text-xs font-mono bg-background"
+                >
                   {format}
                 </Badge>
               ))}
             </div>
           )}
 
-          {/* Metadata Footer */}
-          <div className="flex items-center justify-between pt-2 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Calendar className="size-3" />
-              <span>
-                {formatDistanceToNow(new Date(dataset.updatedAt), { addSuffix: true })}
-              </span>
+          {/* Footer Metrics */}
+          <div className="dataset-footer pt-3 border-t border-border/50 space-y-2.5">
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Calendar className="size-3.5" />
+                <span className="font-medium">
+                  {formatDistanceToNow(new Date(dataset.updatedAt), { addSuffix: true })}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 font-semibold text-foreground">
+                <Download className="size-3.5 text-primary" />
+                <span>{dataset.downloadCount.toLocaleString()}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1 font-medium">
-              <Download className="size-3" />
-              <span>{dataset.downloadCount.toLocaleString()}</span>
-            </div>
+            {dataset.downloadCount > 100 && (
+              <div className="flex items-center gap-1.5 text-xs text-success font-medium">
+                <TrendingUp className="size-3.5" />
+                <span>Popular dataset</span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

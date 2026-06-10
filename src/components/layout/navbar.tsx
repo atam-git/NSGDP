@@ -21,36 +21,36 @@ export function Navbar() {
   const isAdmin = currentUser.role === "super_admin";
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
+    <header className="navbar sticky top-0 z-40 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="navbar-container mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-sm">
+        <Link href="/" className="navbar-logo flex items-center gap-2 flex-shrink-0">
+          <div className="logo-icon flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm font-semibold">
             NS
           </div>
           <div className="hidden sm:block">
             <div className="text-sm font-semibold leading-tight">Niger State</div>
-            <div className="text-xs text-muted-foreground">Open Data Portal</div>
+            <div className="text-xs text-muted-foreground">Open Data</div>
           </div>
         </Link>
 
         {/* Search Bar */}
-        <div className="relative hidden flex-1 max-w-md md:flex">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <div className="navbar-search relative hidden flex-1 max-w-md md:flex">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <Input
             type="search"
             placeholder="Search datasets..."
-            className="w-full pl-9"
+            className="w-full pl-10 pr-3 h-9 text-sm bg-accent/50 border-primary/20 focus:border-primary/50 focus:bg-background"
             aria-label="Search datasets"
           />
         </div>
 
         {/* Navigation */}
-        <nav className="flex items-center gap-2">
+        <nav className="navbar-nav flex items-center gap-2">
           {/* Upload CTA (Contributor+) */}
           {canUpload && (
             <Link href="/datasets/new">
-              <Button className="bg-teal text-teal-foreground hover:bg-teal/90">
+              <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                 <Upload className="size-4" />
                 <span className="hidden sm:inline">Upload</span>
               </Button>
@@ -74,19 +74,19 @@ export function Navbar() {
           {!isAuthenticated ? (
             <>
               <Link href="/login">
-                <Button variant="ghost" size="sm">Log In</Button>
+                <Button variant="ghost" size="sm" className="text-foreground hover:bg-accent">Log In</Button>
               </Link>
               <Link href="/register">
-                <Button size="sm">Register</Button>
+                <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">Register</Button>
               </Link>
             </>
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger
-                className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-muted"
+                className="user-menu-trigger flex items-center gap-2 rounded-lg px-3 py-1.5 hover:bg-muted transition-colors"
                 aria-label="User menu"
               >
-                <div className="flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold text-sm">
+                <div className="flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold text-sm shadow-sm">
                   {currentUser.fullName.charAt(0)}
                 </div>
                 <span className="hidden sm:inline text-sm font-medium">

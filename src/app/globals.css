@@ -141,3 +141,93 @@
     @apply font-sans;
   }
 }
+
+@layer components {
+  /* Navbar */
+  .navbar {
+    @apply shadow-sm;
+  }
+
+  .navbar-container {
+    @apply h-full;
+  }
+
+  .navbar-logo {
+    @apply hover:opacity-85 transition-opacity;
+  }
+
+  .logo-icon {
+    @apply shadow-sm;
+  }
+
+  .navbar-search {
+    @apply mx-4;
+  }
+
+  .navbar-nav {
+    @apply gap-1.5;
+  }
+
+  .user-menu-trigger {
+    @apply outline-none focus:ring-2 focus:ring-primary/30;
+  }
+
+  /* Homepage sections */
+  .hero-section {
+    @apply border-b border-border/50;
+  }
+
+  .stat-card {
+    @apply rounded-lg bg-white dark:bg-slate-950 p-4 shadow-sm border border-border/50 transition-all hover:shadow-md;
+  }
+
+  .credibility-section {
+    @apply border-b border-border/50;
+  }
+
+  .trust-feature {
+    @apply rounded-lg p-0 transition-all hover:bg-background/50;
+  }
+
+  .featured-section {
+    @apply border-b border-border/50;
+  }
+
+  .topics-section {
+    @apply border-b border-border/50;
+  }
+
+  .cta-section {
+    /* padding and styling handled inline */
+  }
+
+  /* Topic tiles */
+  .topic-tile {
+    @apply shadow-sm;
+  }
+
+  .topic-title {
+    @apply group-hover:text-white transition-colors;
+  }
+
+  .topic-count {
+    @apply group-hover:text-white/95;
+  }
+
+  /* Dataset card refinements */
+  .dataset-org-header {
+    @apply pb-0;
+  }
+
+  .dataset-topics {
+    @apply mb-2;
+  }
+
+  .dataset-formats {
+    @apply mb-2;
+  }
+
+  .dataset-footer {
+    @apply mt-auto;
+  }
+}
