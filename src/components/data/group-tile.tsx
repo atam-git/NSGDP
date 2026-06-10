@@ -32,7 +32,7 @@ export function GroupTile({ group, className }: GroupTileProps) {
     <Link href={`/groups/${group.slug}`}>
       <div
         className={cn(
-          "group relative aspect-[4/3] overflow-hidden rounded-lg transition-all hover:shadow-lg hover:scale-[1.02]",
+          "topic-tile group relative aspect-[4/3] overflow-hidden rounded-xl transition-all duration-200 hover:shadow-xl hover:-translate-y-1",
           className
         )}
       >
@@ -42,7 +42,7 @@ export function GroupTile({ group, className }: GroupTileProps) {
             src={group.coverImageUrl}
             alt=""
             fill
-            className="object-cover transition-transform group-hover:scale-105"
+            className="object-cover transition-transform group-hover:scale-105 duration-300"
           />
         ) : (
           <div
@@ -53,17 +53,17 @@ export function GroupTile({ group, className }: GroupTileProps) {
           />
         )}
 
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+        {/* Overlay - Enhanced depth */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent transition-opacity group-hover:from-black/90" />
 
         {/* Content */}
         <div className="absolute inset-0 flex flex-col justify-end p-4 text-white">
-          <h3 className="text-lg font-bold leading-tight mb-1">
+          <h3 className="topic-title text-lg font-bold leading-tight mb-2">
             {group.name}
           </h3>
-          <div className="flex items-center gap-1.5 text-sm text-white/90">
-            <Database className="size-3.5" />
-            <span>{group.datasetCount} datasets</span>
+          <div className="topic-count flex items-center gap-1.5 text-sm text-white/95 font-medium">
+            <Database className="size-4" />
+            <span>{group.datasetCount} dataset{group.datasetCount !== 1 ? 's' : ''}</span>
           </div>
         </div>
       </div>
